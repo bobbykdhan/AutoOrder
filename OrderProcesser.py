@@ -4,6 +4,8 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 
+import Login
+
 PATH = "/Users/bobby/Documents/Projects/AutoOrder/chromedriver"
 
 
@@ -11,6 +13,9 @@ service = Service(PATH)
 options = webdriver.ChromeOptions()
 driver = webdriver.Chrome(service=service, options=options)
 
+Login.signIn()
+
+input("prompt")
 ondemand = "https://ondemand.rit.edu"
 
 ritz = "dc9df36d-8a64-42cf-b7c1-fa041f5f3cfd/2169/4101"
@@ -23,6 +28,7 @@ mid = "dc9df36d-8a64-42cf-b7c1-fa041f5f3cfd/2164/3400"
 checkout = "https://ondemand.rit.edu/fulfillment"
 summary = "https://ondemand.rit.edu/summary"
 payment = "https://ondemand.rit.edu/payment"
+
 
 
 
