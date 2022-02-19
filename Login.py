@@ -17,4 +17,3 @@ def signIn(username, password):
     driver.find_element(By.ID, "password").send_keys(Keys.RETURN)
     print("Waiting for Duo...")
 
-
