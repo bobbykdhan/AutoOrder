@@ -11,13 +11,10 @@ options = webdriver.ChromeOptions()
 
 def signIn(username, password):
     driver = webdriver.Chrome(service=service, options=options)
-    driver.get("https://mycourses.rit.edu/Shibboleth.sso/Login?entityID=https://shibboleth.main.ad.rit.edu/idp/shibboleth&target=https%3A%2F%2Fmycourses.rit.edu%2Fd2l%2FshibbolethSSO%2Flogin.d2l")
+    driver.get("https://shibboleth.main.ad.rit.edu/idp/profile/SAML2/Redirect/SSO?execution=e1s1")
     driver.find_element(By.ID, "username").send_keys(username)
     driver.find_element(By.ID, "password").send_keys(password)
     driver.find_element(By.ID, "password").send_keys(Keys.RETURN)
     print("Waiting for Duo...")
 
 
-
-
-signIn()

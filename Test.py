@@ -17,7 +17,7 @@ driver = webdriver.Chrome(service=service, options=options)
 
 
 
-driver.get("https://www.reddit.com/")
+
 
 htmltext = driver.page_source
 

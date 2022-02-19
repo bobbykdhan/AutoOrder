@@ -3,8 +3,8 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-
 import Login
+from Login import signIn
 
 PATH = "/Users/bobby/Documents/Projects/AutoOrder/chromedriver"
 
@@ -13,7 +13,11 @@ service = Service(PATH)
 options = webdriver.ChromeOptions()
 driver = webdriver.Chrome(service=service, options=options)
 
-Login.signIn()
+signIn()
+
+
+"https://ondemand.rit.edu/menu/dc9df36d-8a64-42cf-b7c1-fa041f5f3cfd/2160/3398/5"
+
 
 input("prompt")
 ondemand = "https://ondemand.rit.edu"
