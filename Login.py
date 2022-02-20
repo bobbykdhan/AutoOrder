@@ -10,5 +10,4 @@ def signIn(username, password, driver):
     driver.find_element(By.ID, "password").send_keys(password)
     driver.find_element(By.NAME, "_eventId_proceed").click()
 
-    print("Waiting for Duo...")
 
