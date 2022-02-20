@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from Login import signIn
+from selenium.webdriver.support import expected_conditions as ec
 
 
 @dataclass
@@ -22,29 +23,46 @@ PATH = "/Users/bobby/Documents/Projects/AutoOrder/chromedriver"
 
 service = Service(PATH)
 options = webdriver.ChromeOptions()
-driver = webdriver.Chrome(service=service, options=options)
+WebDriver = webdriver.Chrome(service=service, options=options)
 
-driver.get("https://ondemand.rit.edu/menu/dc9df36d-8a64-42cf-b7c1-fa041f5f3cfd/2163/5621/5")
-input("waiting for site to load")
-
-itemElements = driver.find_elements(By.CLASS_NAME, "top-container")
 items = []
-count = 0
-for item in itemElements:
 
-    bottomContainer = item.find_element(By.CLASS_NAME, "bottom-container")
-    name = item.find_element(By.CLASS_NAME, "title-hover").text
-    print("added: " + name)
 
-    items.append(Item(name, bottomContainer.find_element(By.CLASS_NAME, "amount").text,
-                      bottomContainer.find_element(By.CLASS_NAME, "add-to-cart-text")))
+def process(driver: WebDriver, store: str, subMenu: str, items: list):
+    wait = WebDriverWait(driver, 150, poll_frequency=1)
 
+    driver.get("https://ondemand.rit.edu/menu/" + store + '/' + subMenu)
+    wait.until(ec.visibility_of_element_located((By.CLASS_NAME, "top-container")))
+
+    itemContainers = driver.find_elements(By.CLASS_NAME, "top-container")
+
+    for itemContainer in itemContainers:
+        bottomContainer = itemContainer.find_element(By.CLASS_NAME, "bottom-container")
+
+        price = bottomContainer.text.split("\n")[0]
+        addToCart = bottomContainer.find_element(By.CLASS_NAME, "add-to-cart-text")
+        # addToCart.click()
+
+        name = itemContainer.find_element(By.CLASS_NAME, "title-hover").text
+
+        newItem = Item(name, price, addToCart)
+        items.append(newItem)
+
+        print(newItem.name + " costing " + newItem.price)
+
+
+process(WebDriver, "dc9df36d-8a64-42cf-b7c1-fa041f5f3cfd/2195/5519", "7", items)
+
+idk = ""
+while (idk != "q"):
+    for item in items:
+        print(str(items.index(item)) + " - " + item.name)
+    idk = input("What do you want / press q to end")
     try:
-        items[count].cartPointer.click()
-        driver.find_element(By.CLASS_NAME, "BottomContainer").find_element(By.CLASS_NAME, 'add-to-cart-button ').click()
+        items[int(idk)].cartPointer.click()
+        WebDriver.find_element(By.ID, "item-detail-parent").find_element(By.CLASS_NAME, 'add-to-cart-button ').click()
 
-    except:
-        print("\tcouldnt find the second one")
 
-    print(items[count].name + " costing " + items[count].price)
-    count += 1
+    except Exception as e:
+        print(e)
+        print("couldnt find the cart button 0")
