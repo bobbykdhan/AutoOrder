@@ -1,19 +1,14 @@
 from selenium import webdriver
-from selenium.webdriver import Keys
+
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 
-PATH = "/Users/bobby/Documents/Projects/AutoOrder/chromedriver"
-service = Service(PATH)
-options = webdriver.ChromeOptions()
 
+def signIn(username, password, driver):
 
-
-def signIn(username, password):
-    driver = webdriver.Chrome(service=service, options=options)
-    driver.get("https://shibboleth.main.ad.rit.edu/idp/profile/SAML2/Redirect/SSO?execution=e1s1")
     driver.find_element(By.ID, "username").send_keys(username)
     driver.find_element(By.ID, "password").send_keys(password)
-    driver.find_element(By.ID, "password").send_keys(Keys.RETURN)
+    driver.find_element(By.NAME, "_eventId_proceed").click()
+
     print("Waiting for Duo...")
 
