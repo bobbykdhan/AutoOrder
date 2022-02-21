@@ -41,11 +41,10 @@ def searchForItems(driver: WebDriver, store: str, subMenu: str, items: list):
         newItem = Item(name, price, addToCart)
         items.append(newItem)
 
-        print(newItem.name + " costing " + newItem.price)
 
-
-def addToCart(items: list, driver: WebDriver, itemIndex: str = None):
-    if (itemIndex is None):
+def addToCart(items: list, driver: WebDriver, itemIndex: int = None):
+    """Adds an item to the cart."""
+    if itemIndex is None:
         for item in items:
             print(str(items.index(item)) + " - " + item.name)
         itemIndex = int(input("Enter the index of the item you want to add to cart: "))
@@ -53,6 +52,7 @@ def addToCart(items: list, driver: WebDriver, itemIndex: str = None):
     try:
         items[itemIndex].cartPointer.click()
         driver.find_element(By.ID, "item-detail-parent").find_element(By.CLASS_NAME, 'add-to-cart-button ').click()
+        print("Added " + items[itemIndex].name + " to cart")
     except Exception as e:
         print(e)
         print("Couldn't add " + str(items[itemIndex].name) + " to cart")
@@ -65,7 +65,7 @@ def checkout(driver: WebDriver):
     time.sleep(0.5)
     continueButton = driver.find_element(By.CLASS_NAME, "pay-cart-button")
     continueButton.click()
-    time.sleep(0.5)
+    time.sleep(1)
     loginButton = driver.find_element(By.CLASS_NAME, "login-btn-atrium")
     loginButton.click()
 
@@ -107,27 +107,34 @@ def fulfillment(firstName, lastInitial, phoneNumber, driver):
 
     driver.find_element(By.CSS_SELECTOR, sendSelector).click()
 
+def changeMenus(menu: str, driver: WebDriver):
 
-def main(driver: WebDriver, items: list, username: str, password: str, firstName: str, lastInitial: str, phoneNumber: str, menu: str, subMenu: str):
 
 
-    searchForItems(WebDriver, menu, subMenu, items)
+
+def main(driver: WebDriver, items: list, username: str, password: str, firstName: str, lastInitial: str,
+         phoneNumber: str, menu: str, subMenu: str):
+
+
     done = False
-
     while not done:
         addToCart(items, WebDriver)
-        if (input("Are you done (Y or N): ") == "Y"):
+        if (input("Are you done (Type Y if you are): ") == "Y"):
             done = True
+
+
     time.sleep(0.5)
     checkout(WebDriver)
     time.sleep(0.5)
     signIn(username, password, WebDriver)
     input("Waiting for duo press any key when complete")
 
-    WebDriver.get("https://ondemand.rit.edu/menu/" +  menu+ "/"+ subMenu)
     wait = WebDriverWait(WebDriver, 150, poll_frequency=1)
-    wait.until(ec.visibility_of_element_located((By.CLASS_NAME, "top-container")))
+    wait.until(ec.presence_of_element_located((By.CLASS_NAME, "cart-link-container")))
+    print("Fulfilling order")
     fulfillment(firstName, lastInitial, phoneNumber, WebDriver)
     print("Done")
 
-main(WebDriver, items, "Bkd7911",input("What is your password"), "Bobby", "D", "9144097471","dc9df36d-8a64-42cf-b7c1-fa041f5f3cfd/2195/5519" + "7")
+
+main(WebDriver, items, "Bkd7911", , "Bobby", "D", "9144097471",
+     "dc9df36d-8a64-42cf-b7c1-fa041f5f3cfd/2195/5519", "7")
