@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from Login import signIn
 from selenium.webdriver.support import expected_conditions as ec
+from secrets import *
 
 
 @dataclass
@@ -20,18 +21,20 @@ class Item:
 PATH = "/Users/bobby/Documents/Projects/AutoOrder/chromedriver"
 service = Service(PATH)
 options = webdriver.ChromeOptions()
+options.add_argument("--window-size=1920,1080")
+options.add_argument("--start-maximized")
 options.add_argument("--headless")
 WebDriver = webdriver.Chrome(service=service, options=options)
+global items
 items = []
 
 
-def searchForItems(driver: WebDriver, store: str, subMenu: str, items: list):
-    wait = WebDriverWait(driver, 150, poll_frequency=1)
+def searchForItems(driver: WebDriver):
+    wait = WebDriverWait(driver, 50, poll_frequency=1)
+    print("Searching for items")
+    wait.until(ec.visibility_of_element_located((By.CLASS_NAME, "detail-container")))
 
-    driver.get("https://ondemand.rit.edu/menu/" + store + '/' + subMenu)
-    wait.until(ec.visibility_of_element_located((By.CLASS_NAME, "top-container")))
-
-    itemContainers = driver.find_elements(By.CLASS_NAME, "top-container")
+    itemContainers = driver.find_elements(By.CLASS_NAME, "detail-container")
 
     for itemContainer in itemContainers:
         bottomContainer = itemContainer.find_element(By.CLASS_NAME, "bottom-container")
@@ -42,38 +45,33 @@ def searchForItems(driver: WebDriver, store: str, subMenu: str, items: list):
         items.append(newItem)
 
 
+
 def addToCart(items: list, driver: WebDriver, itemIndex: int = None):
     """Adds an item to the cart."""
     if itemIndex is None:
         for item in items:
             print(str(items.index(item)) + " - " + item.name)
-        itemIndex = int(input("Enter the index of the item you want to add to cart: "))
+        print("999 - To not add an item")
+        itemIndex = int(input("Enter the index of the item you want to add to cart: \n"))
+    if itemIndex != 999:
+        try:
+            items[itemIndex].cartPointer.click()
 
-    try:
-        items[itemIndex].cartPointer.click()
-        driver.find_element(By.ID, "item-detail-parent").find_element(By.CLASS_NAME, 'add-to-cart-button ').click()
-        print("Added " + items[itemIndex].name + " to cart")
-    except Exception as e:
-        print(e)
-        print("Couldn't add " + str(items[itemIndex].name) + " to cart")
+            wait.until(ec.visibility_of_element_located((By.ID, "item-detail-parent")))
+            idk = driver.find_element(By.ID, "item-detail-parent")
+            idk.find_element(By.CLASS_NAME, 'add-to-cart-button').click()
+            print("Added " + items[itemIndex].name + " to cart")
 
 
-def checkout(driver: WebDriver):
-    time.sleep(0.5)
-    cartButton = driver.find_element(By.CLASS_NAME, "cart-icon")
-    cartButton.click()
-    time.sleep(0.5)
-    continueButton = driver.find_element(By.CLASS_NAME, "pay-cart-button")
-    continueButton.click()
-    time.sleep(1)
-    loginButton = driver.find_element(By.CLASS_NAME, "login-btn-atrium")
-    loginButton.click()
+            selector = "modifiers"
+        except Exception as e:
+            print(e)
+            print("Couldn't add " + str(items[itemIndex].name) + " to cart")
+
 
 
 def fulfillment(firstName, lastInitial, phoneNumber, driver):
-    firstName = "Bobby"
-    lastInitial = "D"
-    phoneNumber = "9144097471"
+   
     cartButton = driver.find_element(By.CLASS_NAME, "cart-icon")
     cartButton.click()
     time.sleep(0.5)
@@ -107,34 +105,56 @@ def fulfillment(firstName, lastInitial, phoneNumber, driver):
 
     driver.find_element(By.CSS_SELECTOR, sendSelector).click()
 
-def changeMenus(menu: str, driver: WebDriver):
+
+def selectMenu(driver: WebDriver):
+    items.clear()
+    driver.find_element(By.CSS_SELECTOR,
+                        "#parent > div.TopContainer.sc-bRbqnn.eWYGcP.sc-bwzfXH.hKiLMS.sc-bdVaJa.iHZvIS > div > div.context-bar.sc-fFTYTi.gkytGs.sc-bwzfXH.hKiLMS.sc-bdVaJa.iHZvIS > div > div.back-link-container.sc-MYvYT.dBNCYJ.sc-bwzfXH.hKiLMS.sc-bdVaJa.iHZvIS > a > div.sc-bIKvTM.ikcqfa.sc-bwzfXH.hKiLMS.sc-bdVaJa.iHZvIS").click()
+    subMenus = driver.find_elements(By.CLASS_NAME, "detail-container")
+    index = 0
+    for menu in subMenus:
+        print(str(index) + " - " + menu.text)
+        index += 1
+    choice = input("Choose the menu you want to shop from: \n")
+    subMenus[int(choice)].click()
+    print("Reindexing items")
 
 
+    wait.until(ec.visibility_of_element_located((By.CLASS_NAME, "detail-container")))
+
+    searchForItems(driver)
 
 
 def main(driver: WebDriver, items: list, username: str, password: str, firstName: str, lastInitial: str,
          phoneNumber: str, menu: str, subMenu: str):
-
-
     done = False
     while not done:
         addToCart(items, WebDriver)
-        if (input("Are you done (Type Y if you are): ") == "Y"):
+        choice = input(
+            "Press Y if you are done adding to cart, Press C if you wish to choose another category, Press any key to keep selecting")
+        if (choice == "Y"):
             done = True
+        elif choice == "C":
+            selectMenu(driver)
 
-
-    time.sleep(0.5)
-    checkout(WebDriver)
     time.sleep(0.5)
     signIn(username, password, WebDriver)
     input("Waiting for duo press any key when complete")
 
-    wait = WebDriverWait(WebDriver, 150, poll_frequency=1)
+
     wait.until(ec.presence_of_element_located((By.CLASS_NAME, "cart-link-container")))
     print("Fulfilling order")
     fulfillment(firstName, lastInitial, phoneNumber, WebDriver)
     print("Done")
 
 
-main(WebDriver, items, "Bkd7911", , "Bobby", "D", "9144097471",
-     "dc9df36d-8a64-42cf-b7c1-fa041f5f3cfd/2195/5519", "7")
+
+
+WebDriver.get("https://ondemand.rit.edu/menu/dc9df36d-8a64-42cf-b7c1-fa041f5f3cfd/2195/5519/0")
+wait = WebDriverWait(WebDriver, 150, poll_frequency=1)
+
+wait.until(ec.visibility_of_element_located((By.CLASS_NAME, "detail-container")))
+
+selectMenu(WebDriver)
+
+main(WebDriver, items, USERNAME, PASSWORD, "Bobby", "D", PHONE, "dc9df36d-8a64-42cf-b7c1-fa041f5f3cfd/2195/5519", "7")
