@@ -18,6 +18,14 @@ class Item:
     price: float
     cartPointer: WebElement
 
+@dataclass
+class Store:
+    """Class for keeping track of a store."""
+    name: str
+    hours: str
+    isClosed: bool
+    selectButton: WebElement
+
 
 # Initialize the Selenium WebDriver and the Wait object.
 PATH = os.getcwd() + "/chromedriver"
@@ -25,7 +33,7 @@ service = Service(PATH)
 options = webdriver.ChromeOptions()
 options.add_argument("--window-size=1920,1080")
 options.add_argument("--start-maximized")
-options.add_argument("--headless")
+# options.add_argument("--headless")
 driver = webdriver.Chrome(service=service, options=options)
 wait = WebDriverWait(driver, 150, poll_frequency=1)
 
@@ -71,7 +79,6 @@ def addToCart(itemIndex: int = None):
             print(str(items.index(item)) + " - " + item.name)
         print("999 - To not add an item")
         # Asks the user for the index of the item they want to add
-
         itemIndex = int(input("Enter the index of the item you want to add to cart: \n"))
 
     # TODO: Add functionality to add items with modifiers
@@ -99,14 +106,14 @@ def selectCategory():
     # Iterates through each category and prints the name and index
     driver.find_element(By.CSS_SELECTOR,
                         "#parent > div.TopContainer.sc-bRbqnn.eWYGcP.sc-bwzfXH.hKiLMS.sc-bdVaJa.iHZvIS > div > div.context-bar.sc-fFTYTi.gkytGs.sc-bwzfXH.hKiLMS.sc-bdVaJa.iHZvIS > div > div.back-link-container.sc-MYvYT.dBNCYJ.sc-bwzfXH.hKiLMS.sc-bdVaJa.iHZvIS > a > div.sc-bIKvTM.ikcqfa.sc-bwzfXH.hKiLMS.sc-bdVaJa.iHZvIS").click()
-    subMenus = driver.find_elements(By.CLASS_NAME, "detail-container")
+    categories = driver.find_elements(By.CLASS_NAME, "detail-container")
     index = 0
-    for menu in subMenus:
-        print(str(index) + " - " + menu.text)
+    for category in categories:
+        print(str(index) + " - " + category.text)
         index += 1
     # Asks the user for the index of the category they want to select and then clicks it
     choice = input("Choose the menu you want to shop from: \n")
-    subMenus[int(choice)].click()
+    categories[int(choice)].click()
     print("Reindexing items\n")
     # Waits for the store to load and searches the site for the items
     wait.until(ec.visibility_of_element_located((By.CLASS_NAME, "detail-container")))
@@ -178,20 +185,19 @@ def fulfillment(firstName, lastInitial, phoneNumber):
 def main():
     """ Main function that runs the program."""
 
+
+    # Opens the ondemand website
+    driver.get("https://ondemand.rit.edu/")
+
+
     # Asks the user for their first name, last initial, phone number, username, and password
     username, password = input("Enter your RIT username: \n"), getpass("Enter your RIT password: \n")
     firstName = input("Enter your first name: \n")
     lastInitial = input("Enter your last initial: \n")
     phoneNumber = input("Enter your phone number: \n")
 
-    # TODO: Add a menu for the user to select from the open stores
-    # Asks the user for the site they want to shop from
-    print("Example: http://ondemand.rit.edu/menu/dc9df36d-8a64-42cf-b7c1-fa041f5f3cfd/2166/3402")
-    print("This is the part you are entering: 'dc9df36d-8a64-42cf-b7c1-fa041f5f3cfd/2166/3402'")
-    store = input("Enter the URL of the store you want to shop from (After the 'menu/' part): \n")
-
-    # Opens the browser to the store the user wants to shop from
-    driver.get("https://ondemand.rit.edu/menu/" + store + "/" + "0")
+    # Asks the user for the store they want to shop from
+    selectStore()
 
     # Waits for the site to load and calls the selectCategory function
     wait.until(ec.visibility_of_element_located((By.CLASS_NAME, "detail-container")))
@@ -219,6 +225,49 @@ def main():
     print("Fulfilling order\n")
     fulfillment(firstName, lastInitial, phoneNumber)
     print("Done placing order\n")
+
+
+def selectStore():
+    """ Selects the store the user wants to shop from """
+
+    # Confirms the site is loaded and stores the store containers in a list
+
+    wait.until(ec.visibility_of_element_located((By.CLASS_NAME, "top-container")))
+    storeContainers = driver.find_element(By.CLASS_NAME, "BottomContainer").find_elements(By.CLASS_NAME, "top-container")
+    print("Site loaded\n")
+    stores = []
+    # Loops through the store containers and creates a Store object for each store
+    for storeContainer in storeContainers:
+        list = storeContainer.text.split("\n")
+        isClosed = (list[2] == "Closed")
+        stores.append(Store(list[0], list[1], isClosed, storeContainer.find_element(By.ID, "pickup-0")))
+
+    while True:
+        for store in stores:
+            print(str(stores.index(store)) + " - " + store.name)
+            print(store.hours)
+            if store.isClosed:
+                print("Closed")
+            else:
+                print("Open")
+        choice = input("Enter the number of the store you want to shop from: \n")
+        if choice.isdigit():
+            if int(choice) < len(stores):
+                if not stores[int(choice)].isClosed:
+                    stores[int(choice)].selectButton.click()
+                    break
+                else:
+                    print("Store is closed")
+            else:
+                print("Invalid store number")
+        else:
+            print("Invalid input")
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
