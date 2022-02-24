@@ -1,13 +1,13 @@
 import time
 from dataclasses import dataclass
-
+from getpass import getpass
+import os
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
-
 from selenium.webdriver.support import expected_conditions as ec
 
 
@@ -20,7 +20,7 @@ class Item:
 
 
 # Initialize the Selenium WebDriver and the Wait object.
-PATH = "/Users/bobby/Library/Mobile Documents/com~apple~CloudDocs/Documents/Projects/AutoOrder/chromedriver"
+PATH = os.getcwd() + "/chromedriver"
 service = Service(PATH)
 options = webdriver.ChromeOptions()
 options.add_argument("--window-size=1920,1080")
@@ -179,7 +179,7 @@ def main():
     """ Main function that runs the program."""
 
     # Asks the user for their first name, last initial, phone number, username, and password
-    username, password = input("Enter your RIT username: \n"), input("Enter your RIT password: \n")
+    username, password = input("Enter your RIT username: \n"), getpass("Enter your RIT password: \n")
     firstName = input("Enter your first name: \n")
     lastInitial = input("Enter your last initial: \n")
     phoneNumber = input("Enter your phone number: \n")
