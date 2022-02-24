@@ -1,13 +1,12 @@
 import time
 from dataclasses import dataclass
-
+import os
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
-
 from selenium.webdriver.support import expected_conditions as ec
 
 
@@ -20,7 +19,7 @@ class Item:
 
 
 # Initialize the Selenium WebDriver and the Wait object.
-PATH = "/Users/bobby/Library/Mobile Documents/com~apple~CloudDocs/Documents/Projects/AutoOrder/chromedriver"
+PATH = os.getcwd() + "/chromedriver"
 service = Service(PATH)
 options = webdriver.ChromeOptions()
 options.add_argument("--window-size=1920,1080")
