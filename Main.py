@@ -110,10 +110,10 @@ def selectCategory():
     print("Reindexing items\n")
     # Waits for the store to load and searches the site for the items
     wait.until(ec.visibility_of_element_located((By.CLASS_NAME, "detail-container")))
-    searchForItems(driver)
+    searchForItems()
 
 
-def signIn(username, password, driver):
+def signIn(username, password):
     """Signs in to Shibboleth using the given username and password."""
 
     # Waits until the cart icon is visible and clicks it
@@ -201,12 +201,12 @@ def main():
     while True:
         addToCart()
         choice = input(
-            "Press Y if you are done adding to cart, Press C if you wish to choose another category, Press any key to keep selecting")
+            "Press Y if you are done adding to cart, Press C if you wish to choose another category, Press any key to keep selecting\n")
         if (choice == "Y"):
             break
         elif choice == "C":
             # Calls the selectCategory function for the user to change their category
-            selectCategory(driver)
+            selectCategory()
 
     print("Logging in\n")
 
