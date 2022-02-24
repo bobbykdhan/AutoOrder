@@ -1,5 +1,6 @@
 import time
 from dataclasses import dataclass
+from getpass import getpass
 import os
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.remote.webelement import WebElement
@@ -178,7 +179,7 @@ def main():
     """ Main function that runs the program."""
 
     # Asks the user for their first name, last initial, phone number, username, and password
-    username, password = input("Enter your RIT username: \n"), input("Enter your RIT password: \n")
+    username, password = input("Enter your RIT username: \n"), getpass("Enter your RIT password: \n")
     firstName = input("Enter your first name: \n")
     lastInitial = input("Enter your last initial: \n")
     phoneNumber = input("Enter your phone number: \n")
